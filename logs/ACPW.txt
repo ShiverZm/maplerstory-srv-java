@@ -1,0 +1,2 @@
+ACC: admin PW: admin MAC : 04-7C-16-CB-69-02 IP: /127.0.0.1:62625
+ACC: admin PW: admin MAC : 04-7C-16-CB-69-02 IP: /127.0.0.1:49287
