@@ -31,7 +31,7 @@ public class DatabaseConnection
     public static int EXECUTE_FAILED;
     public static int RETURN_GENERATED_KEYS;
     public static int NO_GENERATED_KEYS;
-    
+
     public static Connection getConnection() {
         final Thread cThread = Thread.currentThread();
         final int threadID = (int)cThread.getId();
@@ -44,7 +44,7 @@ public class DatabaseConnection
         }
         return ret.getConnection();
     }
-    
+
     private static long getWaitTimeout(final Connection con) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -98,7 +98,7 @@ public class DatabaseConnection
             }
         }
     }
-    
+
     private static Connection connectToDB() {
         if (!DatabaseConnection.propsInited) {
             try {
@@ -144,17 +144,18 @@ public class DatabaseConnection
             return con;
         }
         catch (SQLException e) {
+            System.out.println(e.getStackTrace());
             throw new DatabaseException(e);
         }
     }
-    
+
     public static void closeAll() throws SQLException {
         for (final ConWrapper con : DatabaseConnection.connections.values()) {
             con.connection.close();
         }
         DatabaseConnection.connections.clear();
     }
-    
+
     public static void closeTimeout() {
         int i = 0;
         DatabaseConnection.lock.lock();
@@ -171,7 +172,7 @@ public class DatabaseConnection
             DatabaseConnection.lock.unlock();
         }
     }
-    
+
     static {
         connections = new HashMap<Integer, ConWrapper>();
         lock = new ReentrantLock();
@@ -186,20 +187,20 @@ public class DatabaseConnection
         DatabaseConnection.RETURN_GENERATED_KEYS = 1;
         DatabaseConnection.NO_GENERATED_KEYS = 2;
     }
-    
+
     public static class ConWrapper
     {
         private final int tid;
         private long lastAccessTime;
         private Connection connection;
         private int id;
-        
+
         public ConWrapper(final int tid, final Connection con) {
             this.lastAccessTime = 0L;
             this.tid = tid;
             this.connection = con;
         }
-        
+
         public Connection getConnection() {
             if (this.expiredConnection()) {
                 System.out.println("[DB信息] 连接 " + this.id + " 已经超时.重新连接...");
@@ -212,7 +213,7 @@ public class DatabaseConnection
             this.lastAccessTime = System.currentTimeMillis();
             return this.connection;
         }
-        
+
         public boolean expiredConnection() {
             if (this.lastAccessTime == 0L) {
                 return false;
@@ -224,7 +225,7 @@ public class DatabaseConnection
                 return true;
             }
         }
-        
+
         public boolean close() {
             boolean ret = false;
             if (this.connection == null) {

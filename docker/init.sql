@@ -18,9 +18,7 @@
 --
 -- Table structure for table `accounts`
 --
-create database if not exists maple;
-
-use maple;
+create database if not exists maplestory charset utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
