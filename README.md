@@ -2,19 +2,19 @@
 
 fork from https://github.com/aoaostar/MapleStory
 
-> �ܽ��������˴󲿷ֹ��ƶ��Ƕ����2D��Ϸ����Ũ����Ȥ����̸����
+> 能进来看的人大部分估计都是对这款2D游戏有着浓厚兴趣和深刻感情的
 
-# �򵥽���һ�°�װ��
+# 简单介绍一下安装吧
 
-��Ϸ��װ��Ĳ����Ϊ����
-* ��һ����
+游戏安装大的步骤分为三步
+* 第一步：
 
-1. ��װmysql���ݿ⡢����sql�ļ�
-2. �޸�һ��config�����db.properties �ļ��е����ݿ�������Ϣ������
-3. server.properties �Ƿ���˵�������Ϣ���ɿ����޸�
-4. ���Ŷ˿ڣ�9595��8600��2525~2530
+1. 安装mysql数据库、导入sql文件
+2. 修改一下config下面的db.properties 文件中的数据库连接信息就行了
+3. server.properties 是服务端的配置信息，可看着修改
+4. 开放端口：9595、8600、2525~2530
 
-* �ڶ��������з����
+* 第二步：运行服务端
     
     windows:
     ```shell
@@ -26,40 +26,39 @@ fork from https://github.com/aoaostar/MapleStory
     nohup ./start.sh 2>&1 &
     ```
 
-* ��������������Ϸ
-���ظ��ͻ��ˣ�˫����¼���ͽ�����Ϸ��
+* 第三步：运行游戏
+下载个客户端，双击登录器就进入游戏了
 
-�ͻ��ˣ���ע΢�Ź��ںš������ƹ��ޡ� ���͡�ð�յ� 079�� �����������
+客户端，关注微信公众号【二进制怪兽】 发送【冒险岛 079】 获得下载链接
 
-# ���ο���
-## ����
+# 二次开发
+## 环境
 java1.7
 idea
 mysql5.7
 maven
 
-## ����
-1. idea �������Ŀ
-2. �޸�configĿ¼�µ�db.properties���ݿ���Ϣ
-3. mysql����sql���ݿ�
-4. ����src/java/server/Start.java
-5. �������main
-ע�⣺��Ҫedit configuration
-��VM options������һ�У��������гɹ�:
+## 步骤
+1. idea 导入该项目
+2. 修改config目录下的db.properties数据库信息
+3. mysql导入sql数据库
+4. 进入src/java/server/Start.java
+5. 点击运行main
+注意：需要edit configuration
+在VM options添加这一行，才能运行成功:
 ```
 -DhomePath=$ProjectFileDir$/config/ -DscriptsPath=$ProjectFileDir$/scripts/ -DwzPath=$ProjectFileDir$/scripts/wz
 ```
 
 
-# ��issue
-���Ÿ������⣬���е��Լ�����ˣ��е�����ϣ��������������һ�����Ľ���
+# 提issue
+有着各种问题，我有点自己解决了，有的问题希望大家提出来我们一起来改进。
 
-����ģ�壺
-����+���ֲ���+ϵͳ����+�����Ĵ�ӡ�������Ҫʱ���ϵ�ʱsql�ļ���
+问题模板：
+现象+复现步骤+系统环境+报错的打印输出（必要时附上当时sql文件）
 
 ---
-���������Ŀ�������������Һȱ����ȣ����Ĺ����������Ķ�����
+如果觉得项目不错，可以请我喝杯咖啡，您的鼓励是我最大的动力。
 
-![����·��](./img/dashang_pic.png)
 
 
