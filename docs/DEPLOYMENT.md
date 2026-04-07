@@ -55,7 +55,7 @@ target/MapleStory-079-jar-with-dependencies.jar
 
 注意：`docker/init.sql` 中建库名为 **`maplestory`**，示例 `config/db.properties` 可能为 **`maple`**，部署前请统一。`ServerProperties` 启动时会读表 **`auth_server_channel_ip`**，缺失或连库失败会导致进程退出。
 
-### 3.3 启动命令示例
+### 3.3 启动命令示例（本机）
 
 将路径换成你的部署目录，例如 Linux：**`/root/prod/maple-srv-java`**：
 
@@ -71,7 +71,15 @@ java -server \
 
 Windows 可参考根目录 `start.bat`，或 IDEA 运行配置中的 VM options（见根目录 `README.md`）。
 
-仓库内 **`start.sh`** 使用的主类为 `server.Start` 与固定 jar 名，若与你本地打包文件名不一致，请改为 `-jar ...MapleStory-079-jar-with-dependencies.jar` 或改正 `classpath`。
+当前仓库里的 **`start.sh` / `start.bat`** 使用的是：
+
+- `java -cp ./MapleStory-079.jar ... server.Start`
+- 依赖当前目录下存在 `MapleStory-079.jar`、`config/`、`scripts/`、`scripts/wz/`
+
+若你实际产物是 `target/MapleStory-079-jar-with-dependencies.jar`，需要二选一：
+
+1. 复制并重命名为 `MapleStory-079.jar` 后再跑脚本；
+2. 直接改脚本里的 classpath/JAR 文件名。
 
 ---
 
@@ -137,14 +145,14 @@ docker compose -f .../docker-compose.yaml stop maplestory
 | 路径 | 说明 |
 | --- | --- |
 | **`../config` → `/app/config`** | 宿主 `server.properties`、`shop.properties` 等；**改倍率、频道数、公告等多改这里** |
-| **`./db.compose.properties` → `/app/config/db.properties`** | **覆盖**宿主 `config/db.properties`，使 JDBC 使用服务名 **`mysql`** 与库 **`maplestory`**；勿在容器场景把 URL 写成 `127.0.0.1`（除非 MySQL 打在宿主机网络） |
+| **`./db.compose.properties` → `/app/config/db.properties`** | （若存在该文件）**覆盖**宿主 `config/db.properties`，使 JDBC 使用服务名 **`mysql`** 与库 **`maplestory`**；勿在容器场景把 URL 写成 `127.0.0.1`（除非 MySQL 在宿主机网络） |
 | **`../scripts` → `/app/scripts`** | WZ 与脚本；体量大时挂载可避免每次重建镜像 |
 
-修改 **`config/server.properties`** 后，一般 **`docker compose restart maplestory`** 即可；修改 **`db.compose.properties`** 或 JVM 后同样重启游戏容器。
+修改 **`config/server.properties`** 后，一般 **`docker compose restart maplestory`** 即可；修改 JDBC 配置或 JVM 参数后同样重启游戏容器。
 
 ### 5.3 数据库密码
 
-默认 **`MYSQL_ROOT_PASSWORD`** 与 **`docker/db.compose.properties`** 中 **`password=`** 均为示例值（见 compose 文件注释）。**修改任一者时二者必须一致**，否则游戏服无法连库。
+默认 **`MYSQL_ROOT_PASSWORD`** 与（若使用）**`docker/db.compose.properties`** 中 **`password=`** 需一致。否则游戏服无法连库。
 
 可通过环境变量覆盖，例如在 `docker/` 下放置 `.env`：
 
@@ -153,7 +161,11 @@ MYSQL_ROOT_PASSWORD=你的强密码
 MYSQL_PORT=3306
 ```
 
-并同步改写 **`docker/db.compose.properties`** 中的 `password=`。
+并同步改写你实际挂载到 `/app/config/db.properties` 的文件中的 `password=`。
+
+> 如果你的仓库当前没有 `docker/db.compose.properties`，有两种做法：  
+> 1) 新建该文件并在 compose 中继续覆盖；  
+> 2) 删除 compose 里的这条挂载，直接维护 `config/db.properties`（推荐先备份）。
 
 ### 5.4 首次启动时间
 

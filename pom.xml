@@ -49,6 +49,7 @@
 
 <build>
     <sourceDirectory>src/main/java</sourceDirectory>
+    <finalName>${project.artifactId}-${project.version}</finalName>
 
     <plugins>
         <plugin>
@@ -68,6 +69,8 @@
                 <descriptorRefs>
                     <descriptorRef>jar-with-dependencies</descriptorRef>
                 </descriptorRefs>
+                <!-- 让带依赖的产物直接命名为 MapleStory-079.jar -->
+                <appendAssemblyId>false</appendAssemblyId>
                 <archive>
                     <manifest>
                         <mainClass>server.Start</mainClass>

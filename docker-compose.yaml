@@ -1,9 +1,7 @@
 # MapleStory 079 — Docker Compose
 #
-# 在 docker 目录执行：
+# 在当前目录执行：
 #   docker compose up -d --build
-# 或指定文件（在仓库任意目录）：
-#   docker compose -f docker/docker-compose.yaml up -d --build
 #
 # 首次启动 MySQL 会执行 init.sql，数据量较大，健康检查已放宽等待时间。
 #
@@ -11,7 +9,7 @@
 # - 本机登录器：RoyMS.IP=127.0.0.1 且已映射登录/频道端口时通常可用。
 # - 局域网其他机器：请把宿主 config/server.properties 里 RoyMS.IP 改为宿主机局域网 IP。
 #
-# 默认 root 密码：maplestory_root（MYSQL_ROOT_PASSWORD 与 docker/db.compose.properties 中 password 须一致）。
+# 默认 root 密码：maplestory_root（MYSQL_ROOT_PASSWORD 与 ./db.compose.properties 中 password 须一致）。
 # 修改密码时同步更新 db.compose.properties 内 password= 一行。
 
 services:
@@ -44,8 +42,8 @@ services:
 
   maplestory:
     build:
-      context: ..
-      dockerfile: docker/dockerfile
+      context: .
+      dockerfile: ./Dockerfile
     image: maplestory-srv:079
     container_name: maplestory-srv
     restart: unless-stopped
@@ -53,8 +51,8 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      # 需要更大堆时在此修改或通过 `export JAVA_OPTS=...` 后在 compose 中引用（需自行改为变量形式）
-      JAVA_OPTS: "-Xms512m -Xmx2048m"
+      # 与 start.sh 对齐的 JVM 参数；如需调整可直接修改
+      JAVA_OPTS: "-server -Xms512m -Xmx2048m -XX:PermSize=256m -XX:MaxPermSize=512m -XX:MaxNewSize=512m"
     ports:
       # 单实例检测（一般不对外开放，便于宿主机排查）
       - "6350:6350"
@@ -66,11 +64,13 @@ services:
       # 若使用 RoyMS.Port1=7575 等形式，可一并映射备用段
       - "7575-7585:7575-7585"
     volumes:
-      # 宿主机配置（server.properties、shop 等）；db.properties 由下一条覆盖为容器内 MySQL
-      - ../config:/app/config:ro
+      # 挂载配置（与 start.sh 的 homePath=./config/ 一致）
+      - ./config:/app/config:ro
       - ./db.compose.properties:/app/config/db.properties:ro
-      # 覆盖镜像内 wz/脚本，免重复构建；首次可注释掉改用镜像内置
-      - ../scripts:/app/scripts:ro
+      # 挂载脚本与 wz（与 start.sh 的 scriptsPath/wzPath 一致）
+      - ./scripts:/app/scripts:ro
+      # 挂载日志目录，持久化运行日志与 IP 记录
+      - ./logs:/app/logs
 
 volumes:
   mysql_data:

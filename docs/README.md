@@ -28,10 +28,10 @@
 - `src/main/resources`：收发包操作码表 `recvops.properties`、`sendops.properties` 等。
 - `config/`：运行时外部配置（**必须通过 JVM 指定 `homePath` 指向此目录**）。
 - `scripts/`：脚本与 WZ/XML 数据（`scripts/wz` 体量很大）。
-- `docker/`：`dockerfile` 多阶段构建镜像；`docker-compose.yaml` 编排 MySQL + 游戏服；`init.sql` 初始化数据库；`db.compose.properties` 供 Compose 覆盖 JDBC。
+- `docker/`：`dockerfile` 多阶段构建镜像；`docker-compose.yaml` 编排 MySQL + 游戏服；`init.sql` 初始化数据库；可选 `db.compose.properties` 用于 Compose 覆盖 JDBC。
 
 ## 快速提醒
 
 1. 启动前必须设置系统属性：`homePath`、`scriptsPath`、`wzPath`（见 [DEPLOYMENT.md](./DEPLOYMENT.md)）。
 2. `ServerProperties` 会在加载 `server.properties` 后，从表 **`auth_server_channel_ip`** 合并频道/IP 相关配置。
-3. 仓库内 **`docker/init.sql`** 中 `CREATE DATABASE` 名为 `maplestory`，而示例 **`config/db.properties`** 的 URL 可能指向 `maple`；部署时需统一库名与 JDBC URL。
+3. 仓库内 **`docker/init.sql`** 中 `CREATE DATABASE` 名为 `maplestory`，而示例 **`config/db.properties`** 的 URL 可能指向 `maple`；部署时需统一库名与 JDBC URL（Compose 场景同理）。
