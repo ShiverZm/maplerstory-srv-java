@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Maple 注册</title>
+    <link rel="stylesheet" href="/ruoyi/ry-ui.css">
+</head>
+<body class="ry-body">
+<div class="ry-card">
+    <h2>前台注册</h2>
+    <div class="ry-form-row"><input id="username" placeholder="账号(4-16位)" maxlength="16"></div>
+    <div class="ry-form-row"><input id="password" type="password" placeholder="密码(6-32位)" maxlength="32"></div>
+    <button class="ry-btn" onclick="submitRegister()">提交审核</button>
+    <p id="msg"></p>
+</div>
+<script>
+function submitRegister() {
+  fetch('/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      username: document.getElementById('username').value,
+      password: document.getElementById('password').value
+    })
+  }).then(function(r){return r.json();}).then(function(d){
+    document.getElementById('msg').innerText = d.msg || JSON.stringify(d);
+  }).catch(function(err){
+    document.getElementById('msg').innerText = String(err);
+  });
+}
+</script>
+</body>
+</html>
+

@@ -21,19 +21,19 @@
 
 ## 2. 构建
 
-在**仓库根目录**执行：
+在**仓库根目录**执行（多模块）：
 
 ```bash
 mvn -q clean package -DskipTests
 ```
 
-产物（由 `maven-assembly-plugin` 生成）：
+核心运行产物（由 `maple-server` 模块 `maven-assembly-plugin` 生成）：
 
 ```text
-target/MapleStory-079-jar-with-dependencies.jar
+maple-server/target/maple-server-079.jar
 ```
 
-构建上下文若包含本机 `jdk/` 等大目录，可在仓库根使用 **`.dockerignore`**（已提供）避免 `docker build` 上传过慢。
+`maple-web-admin` 子模块为 RuoYi 风格 Spring Boot 管理模块（后台管理），`maple-web-front` 子模块用于前台注册展示；二者依赖 `maple-web-core` 并由 `maple-server` 启动时内嵌拉起。
 
 ---
 
@@ -66,7 +66,7 @@ java -server \
   -DscriptsPath=/root/prod/maple-srv-java/scripts/ \
   -DwzPath=/root/prod/maple-srv-java/scripts/wz \
   -Xms512m -Xmx2048m \
-  -jar target/MapleStory-079-jar-with-dependencies.jar
+  -jar maple-server/target/maple-server-079.jar
 ```
 
 Windows 可参考根目录 `start.bat`，或 IDEA 运行配置中的 VM options（见根目录 `README.md`）。
@@ -76,7 +76,7 @@ Windows 可参考根目录 `start.bat`，或 IDEA 运行配置中的 VM options�
 - `java -cp ./MapleStory-079.jar ... server.Start`
 - 依赖当前目录下存在 `MapleStory-079.jar`、`config/`、`scripts/`、`scripts/wz/`
 
-若你实际产物是 `target/MapleStory-079-jar-with-dependencies.jar`，需要二选一：
+若你仍使用旧脚本 `start.sh/start.bat` 中的 `MapleStory-079.jar` 名称，需要二选一：
 
 1. 复制并重命名为 `MapleStory-079.jar` 后再跑脚本；
 2. 直接改脚本里的 classpath/JAR 文件名。

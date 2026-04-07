@@ -5,101 +5,37 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com</groupId>
-    <artifactId>MapleStory</artifactId>
+    <artifactId>maplestory-parent</artifactId>
     <version>079</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>MapleStory</name>
-    <description>MapleStory server</description>
+    <name>MapleStory Parent</name>
+    <description>MapleStory multi-module parent</description>
 
+    <modules>
+        <module>maple-web-core</module>
+        <module>maple-web-admin</module>
+        <module>maple-web-front</module>
+        <module>maple-server</module>
+    </modules>
 
-<properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.7</java.version>
-</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <spring-boot.version>2.5.15</spring-boot.version>
+    </properties>
 
-
-<dependencies>
-    <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.12</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.apache.mina</groupId>
-        <artifactId>mina-core</artifactId>
-        <version>2.0.9</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.30</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>1.7.30</version>
-    </dependency>
-
-</dependencies>
-
-<build>
-    <sourceDirectory>src/main/java</sourceDirectory>
-    <finalName>${project.artifactId}-${project.version}</finalName>
-
-    <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.6.0</version>
-            <configuration>
-                <source>1.7</source>
-                <target>1.7</target>
-                <encoding>UTF-8</encoding>
-            </configuration>
-        </plugin>
-
-        <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <configuration>
-                <descriptorRefs>
-                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
-                <!-- 让带依赖的产物直接命名为 MapleStory-079.jar -->
-                <appendAssemblyId>false</appendAssemblyId>
-                <archive>
-                    <manifest>
-                        <mainClass>server.Start</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>make-assembly</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>single</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-
-        <plugin>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>3.0.2</version>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <mainClass>server.Start</mainClass>
-                    </manifest>
-                </archive>
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
 

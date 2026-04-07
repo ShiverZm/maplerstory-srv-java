@@ -8,7 +8,7 @@
 | --- | --- |
 | 游戏版本 | MapleStory **079**（`ServerConstants.MAPLE_VERSION = 79`，补丁 `1`） |
 | 客户端区域 | 中国区编码（`MapleType.中国`，GB18030） |
-| 运行环境 | **Java 7**、**Maven**、**MySQL**（常见为 5.7） |
+| 运行环境 | **Java 8**、**Maven**、**MySQL**（常见为 5.7） |
 | 网络框架 | **Apache MINA 2**（`NioSocketAcceptor` + 自定义编解码） |
 | 持久化 | **JDBC**（`mysql-connector-java`），无 Spring / MyBatis |
 | 入口类 | `server.Start` |
@@ -21,11 +21,14 @@
 - [代码结构](./CODEBASE.md)：顶层包职责与关键类索引。
 - [部署指南](./DEPLOYMENT.md)：本机 / Docker / Compose、端口与防火墙、`RoyMS.IP`、生产路径示例。
 - [配置项说明](./CONFIGURATION.md)：`server.properties`、`db.properties` 及与代码的对应关系。
+- [网页账号管理](./ACCOUNT_ADMIN_WEB.md)：前台注册 + 后台审批 + 管理员直建账号（兼容现有登录密码算法）。
 
 ## 仓库主要目录（非详尽）
 
-- `src/main/java`：服务端主代码（约 388 个 `.java`）。
-- `src/main/resources`：收发包操作码表 `recvops.properties`、`sendops.properties` 等。
+- `maple-server/`：游戏服务端主实现模块（标准 `src/main` 目录）。
+- `maple-web-front/`：网页前台展示模块（注册入口，复用 RuoYi UI/组件风格）。
+- `maple-web-admin/`：网页后台管理模块（复用 RuoYi 后台风格与组件体系）。
+- `maple-web-core/`：RuoYi 核心能力模块（承载 `ruoyi-common/framework/system/generator/quartz` 对应代码）。
 - `config/`：运行时外部配置（**必须通过 JVM 指定 `homePath` 指向此目录**）。
 - `scripts/`：脚本与 WZ/XML 数据（`scripts/wz` 体量很大）。
 - `docker/`：`dockerfile` 多阶段构建镜像；`docker-compose.yaml` 编排 MySQL + 游戏服；`init.sql` 初始化数据库；可选 `db.compose.properties` 用于 Compose 覆盖 JDBC。

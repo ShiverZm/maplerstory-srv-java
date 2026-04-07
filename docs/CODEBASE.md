@@ -1,6 +1,7 @@
 # 代码结构
 
-以下为 **`src/main/java`** 顶层包职责说明，便于定位功能与评估改动影响。
+当前项目为 Maven 多模块：`maple-server`（游戏服主实现） + `maple-web-front`（前台） + `maple-web-admin`（后台） + `maple-web-core`（RuoYi 核心）。
+以下说明以主服务源码目录（`maple-server/src/main/java`）为主。
 
 ## `server`
 
@@ -59,6 +60,13 @@
 ## `gui`
 
 可选的管理界面 `RoyMS`（Swing）。
+
+## `maple-web-front` / `maple-web-admin` / `maple-web-core` 子模块
+
+- `maple-web-front`：前台注册展示与交互入口，复用 RuoYi UI 风格。
+- `maple-web-admin`：后台管理能力，等价 RuoYi 的 admin 职责。
+- `maple-web-core`：RuoYi 核心代码承载模块，集中放置 `com.ruoyi.common/framework/system/generator/quartz`。
+- Web 核心入口为 `WebModuleBootstrap`，由 `server.Start` 在主服务启动流程中调用。
 
 ## `KinMS`
 

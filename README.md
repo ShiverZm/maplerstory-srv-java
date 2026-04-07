@@ -33,16 +33,37 @@ fork from https://github.com/aoaostar/MapleStory
 
 # 二次开发
 ## 环境
-java1.7
+java1.8
 idea
 mysql5.7
 maven
+
+## 多模块说明
+
+项目已调整为 Maven 多模块：
+
+- `maple-server`：游戏服务端主模块（入口 `server.Start`）
+- `maple-web-front`：前台注册展示模块（复用 RuoYi UI/组件风格）
+- `maple-web-admin`：后台管理模块（复用 RuoYi 后台风格）
+- `maple-web-core`：RuoYi 核心能力模块（承载 common/framework/system 等核心代码）
+
+在项目根目录构建：
+
+```shell
+mvn clean package
+```
+
+核心可执行产物在：
+
+```text
+maple-server/target/maple-server-079.jar
+```
 
 ## 步骤
 1. idea 导入该项目
 2. 修改config目录下的db.properties数据库信息
 3. mysql导入sql数据库
-4. 进入src/java/server/Start.java
+4. 进入 `maple-server/src/main/java/server/Start.java`
 5. 点击运行main
 注意：需要edit configuration
 在VM options添加这一行，才能运行成功:

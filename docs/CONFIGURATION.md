@@ -27,6 +27,13 @@
 | `RoyMS.防万能检测` | 周期性对在线角色执行 `startCheck` |
 | `RoyMS.封包显示`、`RoyMS.调试输出封包`、`RoyMS.记录38错误` | 调试与封包错误记录 |
 | `RoyMS.loadGui` | 是否打开 Swing 工具 `RoyMS` |
+| `RoyMS.WebAdminEnabled` | 是否启用内置网页账号管理 |
+| `RoyMS.WebAdminHost` / `RoyMS.WebAdminPort` | 网页管理监听地址与端口 |
+| `RoyMS.WebAdminToken` | 网页管理请求头 `X-Admin-Token` 对应密钥 |
+| `RoyMS.WebAdminAllowIps` | 网页管理来源 IP 白名单（逗号分隔） |
+| `RoyMS.WebRegisterEnabled` | 是否启用前台注册页面（`/register`） |
+| `RoyMS.WebRegisterNeedCaptcha` | 前台验证码预留开关（当前仅预留） |
+| `RoyMS.WebRegisterRateLimitSeconds` | 前台同 IP 注册提交最小间隔（秒） |
 
 另有赌博、PVP 地图 ID、职业群开关等扩展项，见 `server.properties` 全文。
 
