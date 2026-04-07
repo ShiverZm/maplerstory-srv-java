@@ -1,0 +1,149 @@
+# 在 release 分支的提交上推送合规 TAG（v* 语义版本）时触发；
+# 在 Linux / Windows 上用 Java 7（Zulu）Maven 打包并上传部署目录（不含 docker）。
+#
+# 打标签示例（在 release 分支最新提交上）：
+#   git checkout release && git pull
+#   git tag v1.2.3
+#   git push origin v1.2.3
+name: Release tag build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  # 标签名必须符合 v 开头的版本格式；且标签指向的提交必须存在于 origin/release 上
+  validate-release-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag format
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "Tag: $TAG"
+          # v1.0、v1.2.3、v2.0.0-beta、v1.0.0-alpha.1 等（预发布段可含字母数字与 . -）
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?(-[a-zA-Z0-9][a-zA-Z0-9.-]*)?$ ]]; then
+            echo "::error::标签格式不合法。要求：以 v 开头 + 主.次[.修订][-预发布]，例如 v1.0、v1.2.3、v2.0.0-beta"
+            exit 1
+          fi
+
+      - name: Verify tagged commit is on branch release
+        run: |
+          set -e
+          git fetch origin release
+          if ! git branch -r --contains "$GITHUB_SHA" | grep -q 'origin/release'; then
+            echo "::error::标签 ${GITHUB_REF} 指向的提交 (${GITHUB_SHA:0:7}) 不在 origin/release 上。"
+            echo "请仅在 release 分支历史中的提交上创建标签：git checkout release && git tag <tag> && git push origin <tag>"
+            exit 1
+          fi
+          echo "OK: commit is contained in origin/release"
+
+  build-and-bundle:
+    needs: validate-release-tag
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.platform }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 7 (Zulu)
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "7"
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B -ntp package -DskipTests
+
+      - name: Verify fat JAR
+        run: test -f target/MapleStory-079-jar-with-dependencies.jar
+
+      - name: Assemble deployment bundle (no docker)
+        run: |
+          set -e
+          BUNDLE="release-bundle"
+          rm -rf "$BUNDLE"
+          mkdir -p "$BUNDLE/jars" "$BUNDLE/docs"
+          cp target/MapleStory-079-jar-with-dependencies.jar "$BUNDLE/jars/"
+          cp -r config "$BUNDLE/"
+          if [ -d scripts ]; then
+            cp -r scripts "$BUNDLE/"
+          else
+            echo "注意: 仓库中未包含 scripts/ 目录，部署时请自行准备 WZ 与脚本。" | tee "$BUNDLE/MISSING_SCRIPTS.txt"
+          fi
+          cp docs/DEPLOYMENT.md docs/CONFIGURATION.md "$BUNDLE/docs/" 2>/dev/null || true
+
+          {
+            echo '#!/usr/bin/env bash'
+            echo 'set -e'
+            echo 'ROOT="$(cd "$(dirname "$0")" && pwd)"'
+            echo 'cd "$ROOT"'
+            echo 'exec java -server \'
+            echo '  -DhomePath="${ROOT}/config/" \'
+            echo '  -DscriptsPath="${ROOT}/scripts/" \'
+            echo '  -DwzPath="${ROOT}/scripts/wz" \'
+            echo '  -Xms512m -Xmx2048m \'
+            echo '  -XX:PermSize=256m -XX:MaxPermSize=512m \'
+            echo '  -jar "${ROOT}/jars/MapleStory-079-jar-with-dependencies.jar"'
+          } > "$BUNDLE/start.sh"
+          chmod +x "$BUNDLE/start.sh"
+
+          printf '%s\r\n' \
+            '@echo off' \
+            'setlocal EnableExtensions' \
+            'cd /d "%~dp0"' \
+            'set "ROOT=%cd%"' \
+            'java -server -DhomePath="%ROOT%\\config\\" -DscriptsPath="%ROOT%\\scripts\\" -DwzPath="%ROOT%\\scripts\\wz" -Xms512m -Xmx2048m -XX:PermSize=256m -XX:MaxPermSize=512m -jar "%ROOT%\\jars\\MapleStory-079-jar-with-dependencies.jar"' \
+            > "$BUNDLE/start.bat"
+
+          {
+            echo "MapleStory 079 服务端 — CI 部署包（无 Docker 目录） tag=${GITHUB_REF_NAME}"
+            echo '================================================'
+            echo ''
+            echo "Git 标签: ${GITHUB_REF_NAME}  提交: ${GITHUB_SHA}"
+            echo '构建平台见 Artifact 名称：linux / windows'
+            echo '（字节码一致；均在对应 Runner 上用 Java 7 Zulu 编译。）'
+            echo ''
+            echo 'jars/  MapleStory-079-jar-with-dependencies.jar'
+            echo 'config/  部署前请修改 server.properties、db.properties 等'
+            echo 'scripts/ 游戏脚本与 wz（若未纳入仓库见 MISSING_SCRIPTS.txt）'
+            echo ''
+            echo '启动: Linux ./start.sh   Windows start.bat'
+            echo '详见 docs/DEPLOYMENT.md。容器化请使用仓库 docker/（本包不含）。'
+          } > "$BUNDLE/README_DEPLOY.txt"
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: maplestory-079-deploy-${{ matrix.platform }}-${{ github.ref_name }}
+          path: release-bundle/
+          retention-days: 90
+          if-no-files-found: error

@@ -1,0 +1,76 @@
+# MapleStory 079 — Docker Compose
+#
+# 在 docker 目录执行：
+#   docker compose up -d --build
+# 或指定文件（在仓库任意目录）：
+#   docker compose -f docker/docker-compose.yaml up -d --build
+#
+# 首次启动 MySQL 会执行 init.sql，数据量较大，健康检查已放宽等待时间。
+#
+# 客户端联机：
+# - 本机登录器：RoyMS.IP=127.0.0.1 且已映射登录/频道端口时通常可用。
+# - 局域网其他机器：请把宿主 config/server.properties 里 RoyMS.IP 改为宿主机局域网 IP。
+#
+# 默认 root 密码：maplestory_root（MYSQL_ROOT_PASSWORD 与 docker/db.compose.properties 中 password 须一致）。
+# 修改密码时同步更新 db.compose.properties 内 password= 一行。
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: maplestory-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-maplestory_root}"
+      MYSQL_DATABASE: maplestory
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --sql-mode=NO_AUTO_VALUE_ON_ZERO
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      start_period: 300s
+
+  maplestory:
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
+    image: maplestory-srv:079
+    container_name: maplestory-srv
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # 需要更大堆时在此修改或通过 `export JAVA_OPTS=...` 后在 compose 中引用（需自行改为变量形式）
+      JAVA_OPTS: "-Xms512m -Xmx2048m"
+    ports:
+      # 单实例检测（一般不对外开放，便于宿主机排查）
+      - "6350:6350"
+      # 登录 / 商城（与 config/server.properties 中 RoyMS.LPort、RoyMS.CSPort 一致）
+      - "9555:9555"
+      - "8600:8600"
+      # 频道端口：未配置 RoyMS.Port{n} 时为 2524+频道；默认 6 频道即 2525-2530
+      - "2525-2530:2525-2530"
+      # 若使用 RoyMS.Port1=7575 等形式，可一并映射备用段
+      - "7575-7585:7575-7585"
+    volumes:
+      # 宿主机配置（server.properties、shop 等）；db.properties 由下一条覆盖为容器内 MySQL
+      - ../config:/app/config:ro
+      - ./db.compose.properties:/app/config/db.properties:ro
+      # 覆盖镜像内 wz/脚本，免重复构建；首次可注释掉改用镜像内置
+      - ../scripts:/app/scripts:ro
+
+volumes:
+  mysql_data:

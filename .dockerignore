@@ -1,0 +1,11 @@
+# 缩小 docker build 上下文（构建命令仍在仓库根目录：docker build -f docker/dockerfile .）
+target/
+.git/
+.idea/
+.vscode/
+jdk/
+logs/
+bin/
+.dist/
+out/
+*.iml
